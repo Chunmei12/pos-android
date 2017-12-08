@@ -125,6 +125,17 @@ const TicketHeaderSchema = {
   }
 }
 
+
+const TicketHeaderSchema2 = {
+  name: 'TicketHeader',
+  primaryKey: 'id',
+  properties: {
+    id: 'int',
+    text: { type: 'string', default: '' },
+    size: { type: 'int', default: 1 }
+  }
+}
+
 const TicketFooterSchema = {
   name: 'TicketFooter',
   primaryKey: 'id',
@@ -132,6 +143,16 @@ const TicketFooterSchema = {
     id: 'int',
     footer: { type: 'list', objectType: 'StringObject' },
     separator: { type: 'list', objectType: 'SeparatorObject' } //{"activated": true, "type": "dashed"},
+  }
+};
+
+const TicketFooterSchema2 = {
+  name: 'TicketFooter',
+  primaryKey: 'id',
+  properties: {
+    id: 'int',
+    text: { type: 'string', default: '' },
+    size: { type: 'int', default: 1 }
   }
 };
 
@@ -1084,6 +1105,47 @@ var schemas = [
     // path: realmPath,
     // encryptionKey: key
   },
+  { 
+    schema: 
+    [
+      OrderPaymentSchema,
+      CartProductSchema15,
+      StringObjectSchema,
+      AddressSchema11,
+      BookingSchema,
+      CategorySchema11,
+      SubCategorySchema,
+      CustomerSchema,
+      UserSchema,
+      FinishedOrderSchema,
+      TicketHeaderSchema2,
+      TicketFooterSchema2,
+      OrderSchema11,
+      PaymentMethodSchema,
+      PrinterSchema,
+      ProductSchema11,
+      TableSchema,
+      VatSchema,
+      CreditSchema,
+      SeparatorSchema,
+      CartCustomerSchema,
+      PreferencesSchema16,
+      ZSchema,
+      ZMonthlySchema,
+      TracerSchema,
+      ExpenseReportSchema,
+      DuplicateSchema,
+      GrandTotalTicketSchema,
+      GrandTotalPeriodSchema,
+      GrandTotalMonthlySchema,
+      ArchiveSchema,
+      ConfigSchema,
+    ],
+    schemaVersion: 10,
+    migration: function(){},
+    // path: realmPath,
+    // encryptionKey: key
+  },
 ]
 
 let nextSchemaIndex = Realm.schemaVersion(Realm.defaultPath);
@@ -1093,31 +1155,9 @@ while (nextSchemaIndex < schemas.length) {
   migratedRealm.close();
 }
 
-// let users = Realm.Sync.User.all;
-// for(const key in users) {
-//   const user = users[key];
-//  user.logout();
-// }
+var realm = new Realm(schemas[schemas.length-1]);
+module.exports = realm;
 
-Realm.Sync.User.login('http://162.243.142.123:9080', '25375@easoft.pro', '1qx/p/dX', (error, user) => {
-  console.log("USER: " + user)
-});
 
-let user = Realm.Sync.User.current
-if (user) {
-  
-  let synchedRealm = new Realm({
-    sync: {
-      user: Realm.Sync.User.current,
-      url: 'realm://162.243.142.123:9080/~/25375',
-    },
-    schema: schemas[schemas.length-1].schema,
-    schemaVersion: schemas[schemas.length-1].schemaVersion,
-  });
-  module.exports = synchedRealm;
-} else {
-  
-  var realm = new Realm(schemas[schemas.length-1]);
-  module.exports = realm;
-}
+
 

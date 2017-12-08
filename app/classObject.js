@@ -7,11 +7,12 @@ class OrderClass {
     this.id = id;
     this.nbCustomer = 0;
     this.createdAt = new Date();
-    this.table = 'C' + totalDelivery;
+    this.table = 'L' + totalDelivery;
     this.type = type;
     this.takeAwayName = '';
     this.takeAwayPhone = '';
     this.products = [];
+    this.takeAwayPhone = '';
     this.nbPrinted = 0;
     this.payments = [];
     this.userId = 0;
@@ -41,7 +42,7 @@ class Order {
     this.id = id;
     this.nbCustomer = 0;
     this.createdAt = new Date();
-    this.table = 'C' + totalDelivery;
+    this.table = 'L' + totalDelivery;
     this.type = type;
     this.takeAwayName = '';
     this.takeAwayPhone = '';

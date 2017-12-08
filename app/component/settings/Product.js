@@ -92,6 +92,7 @@ export default class Product  extends React.Component {
   
     updateUI() {
       this.setState({
+        selectedProduct: {priceTtc: 0},
         dbCategory: realm.objects('Category'),
         dbSubCategory: realm.objects('SubCategory'),
         dbProduct: realm.objects('Product'),
@@ -100,12 +101,29 @@ export default class Product  extends React.Component {
 
 
     selectCategory(category) {
-      this.setState({
-        selectedCategory: category,
-        showPopupProduct: false,
-        showPopupSubCategory: false,
-        showPopupCategory: true
-      })
+      
+      var subCategory = realm.objects('SubCategory').filtered('categoryId = ' + category.id)
+      if (subCategory.length) {
+        var subCat = subCategory.sorted('position')[0]
+        this.setState({
+          subCategoryPosition: subCat.position,
+          selectedCategory: category,
+          selectedSubCategory: subCat,
+          showPopupProduct: false,
+          showPopupSubCategory: false,
+          showPopupCategory: true
+        })
+      }
+      else {
+        this.setState({
+          subCategoryPosition: 1,
+          selectedCategory: category,
+          selectedSubCategory: {id: 0},
+          showPopupProduct: false,
+          showPopupSubCategory: false,
+          showPopupCategory: true
+        })
+      }
     }
 
     selectSubCategory(subCategory) {
@@ -153,7 +171,7 @@ export default class Product  extends React.Component {
         navigate('ProductEdit', {
           product: this.state.selectedProduct,
           category: this.state.selectedCategory,
-          subCategory: this.state.selectedCategory
+          subCategory: this.state.selectedSubCategory
         })
         
       }
@@ -266,7 +284,7 @@ export default class Product  extends React.Component {
                   />
               </TouchableHighlight>
               <View>
-                <Text style={{color: 'white', fontWeight: 'bold', fontSize: 22}}>{this.state.selectedProduct.name}</Text>
+                <Text style={{color: 'white', fontWeight: 'bold', fontSize: 22}}>{this.state.selectedProduct ? this.state.selectedProduct.name : ''}</Text>
               </View>
               <TouchableHighlight onPress={() => {this.showForm()}} style={styles.updateButton}>
                 <Text style={{color: 'white', fontWeight: 'bold', fontSize: 22}}>更改</Text>

@@ -22,8 +22,6 @@ import {Order} from '../classObject';
 import {printTicket} from '../printData'
 import ScrollableTabView, {DefaultTabBar} from 'react-native-scrollable-tab-view';
 import PopupDialog, { SlideAnimation } from 'react-native-popup-dialog';
-//import I18n from 'react-native-i18n'
-require('../translations');
 
 const slideAnimation = new SlideAnimation({
   slideFrom: 'bottom',
@@ -34,13 +32,6 @@ export default class OrderList extends React.Component {
     super(props);
     this._onPressButton = this._onPressButton.bind(this)
     this.updateUI = this.updateUI.bind(this)
-    this.newSitOrderStep11 = this.newSitOrderStep11.bind(this)
-    this.newSitOrderStep22 = this.newSitOrderStep22.bind(this)
-    this.newSitOrderStep1 = this.newSitOrderStep1.bind(this)
-    this.newSitOrderStep2 = this.newSitOrderStep2.bind(this)
-    this.getStats = this.getStats.bind(this)
-    //this.updateTablePrice = this.updateTablePrice.bind(this)
-    
     this.orders = realm.objects('Order').sorted('id')
     this.state = {
       tables: Array.prototype.slice.call(realm.objects('Table').filtered('name != "" AND type != "object"').sorted('name')).sort((a, b) => a.name.localeCompare(b.name)),
@@ -54,20 +45,13 @@ export default class OrderList extends React.Component {
       orderDelivery: realm.objects('Order').filtered('type = "delivery" AND closed = false').sorted('createdAt', true),
       sitNumber: '',
       nbCustomer: '',
-      selectedTable: {id: 0, name: ''}
     }
-    
     realm.addListener('change', this.updateUI);
 
   }
 
   componentWillUnmount() {
     realm.removeAllListeners();    
-  }
-
-  componentWillMount() {
-    let finishedOrders = realm.objects('FinishedOrder').sorted('id', false).filtered('closed = false')
-    this.getStats(finishedOrders);
   }
 
   updateUI() {
@@ -101,7 +85,8 @@ export default class OrderList extends React.Component {
   _onPressButton(id) {
     const { navigate } = this.props.navigation
     navigate('Order', {orderId: id})
-  } 
+  }
+
 
   newOrder(orderType) {
 
@@ -110,15 +95,15 @@ export default class OrderList extends React.Component {
     if (orderType == 'bar') {
       var newOrder = new Order(this.orders.length > 0? this.orders[this.orders.length - 1].id + 1 : 1,'bar');
       newOrder.table = 'C' + (this.state.totalBar + 1)
-      newOrder.nbPrinted = 0
+      newOrder.nbPrinted = 1
       newOrder.userId = 1//this.props.currentUser.id
       newOrder.userName = 'Gerant'//this.props.currentUser.name
       // newOrder.deviceId = this.state.config.deviceId
       // newOrder.appVersion = this.state.config.appVersion
       // newOrder.ticketHeaderId = this.state.config.ticketHeaderId
       // newOrder.ticketFooterId = this.state.config.ticketFooterId
-      newOrder.deviceId = 2
-      newOrder.appVersion = '1.9'
+      newOrder.deviceId = 1
+      newOrder.appVersion = '1'
       newOrder.ticketHeaderId = 1
       newOrder.ticketFooterId = 1
       realm.write(() => {
@@ -129,15 +114,15 @@ export default class OrderList extends React.Component {
     else if (orderType == 'takeAway') {
       var newOrder = new Order(this.orders.length > 0? this.orders[this.orders.length - 1].id + 1 : 1,'takeAway');
       newOrder.table = 'E' + (this.state.totalTakeAway + 1)
-      newOrder.nbPrinted = 0
+      newOrder.nbPrinted = 1
       newOrder.userId = 1//this.props.currentUser.id
       newOrder.userName = 'Gerant'//this.props.currentUser.name
       // newOrder.deviceId = this.state.config.deviceId
       // newOrder.appVersion = this.state.config.appVersion
       // newOrder.ticketHeaderId = this.state.config.ticketHeaderId
       // newOrder.ticketFooterId = this.state.config.ticketFooterId
-      newOrder.deviceId = 2
-      newOrder.appVersion = '1.8'
+      newOrder.deviceId = 1
+      newOrder.appVersion = '1'
       newOrder.ticketHeaderId = 1
       newOrder.ticketFooterId = 1
       realm.write(() => {
@@ -146,43 +131,30 @@ export default class OrderList extends React.Component {
       navigate('Order', {orderId: newOrder.id})
     }
     else if (orderType == 'sit') {
-      this.setState({sitNumber: '', nbCustomer: ''})
-      this.tableListDialog.show()
-    }
-    else if (orderType == 'sit') {
-      this.setState({sitNumber: '', nbCustomer: ''})
+      //this.setState({sitNumber: '', nbCustomer: ''})
       this.keyboardDialog.show()
       this.refs.sitNumber.focus()
     }
   }
 
-  newSitOrderStep11(table) {
-    this.setState({selectedTable: table})
-    this.tableListDialog.dismiss()
-    this.personKeyboardDialog.show()
-    this.refs.nbCustomer.focus()
-  }
-
-  newSitOrderStep22() {
-    
+  newSitOrder(table) {
+    const { navigate } = this.props.navigation 
     var newOrder = new Order(this.orders.length > 0? this.orders[this.orders.length - 1].id + 1 : 1, 'sit');
-    newOrder.table = this.state.selectedTable.name
-    newOrder.nbPrinted = 0
+    newOrder.table = table.name
+    newOrder.nbPrinted = 1
     newOrder.userId = 1//this.props.currentUser.id
     newOrder.userName = 'Gerant'//this.props.currentUser.name
-    newOrder.deviceId = 2
-    newOrder.appVersion = '1.8'
-    newOrder.ticketHeaderId = 1
-    newOrder.ticketFooterId = 1
+    newOrder.deviceId = this.state.config.deviceId
+    newOrder.appVersion = this.state.config.appVersion
+    newOrder.ticketHeaderId = this.state.config.ticketHeaderId
+    newOrder.ticketFooterId = this.state.config.ticketFooterId
     realm.write(() => {
       realm.create('Order', newOrder )
-      realm.create('Table', { id: this.state.selectedTable.id, idOrder: newOrder.id }, true);
+      realm.create('Table', { id: table.id, idOrder: newOrder.id }, true);
     })
 
-    const { navigate } = this.props.navigation 
-    navigate('order', {orderId: newOrder.id})
-    this.personKeyboardDialog.dismiss()
-    this.setState({sitNumber: '', nbCustomer: ''})
+    navigate('orderView', {orderId: newOrder.id})
+    this.tableListDialog.dismiss()
   }
 
   newSitOrderStep1() {
@@ -194,58 +166,23 @@ export default class OrderList extends React.Component {
 
   newSitOrderStep2() {
     if (this.state.nbCustomer == '') return
-    
+    const { navigate } = this.props.navigation
     var newOrder = new Order(this.orders.length > 0? this.orders[this.orders.length - 1].id + 1 : 1, 'sit');
     newOrder.table = this.state.sitNumber
     newOrder.nbCustomer = parseInt(this.state.nbCustomer)
     newOrder.userId = 1//this.props.currentUser.id
     newOrder.userName = 'Gerant'//this.props.currentUser.name
-    newOrder.deviceId = 2
-    newOrder.appVersion = '1.8'
+    newOrder.deviceId = 1
+    newOrder.appVersion = '1'
     newOrder.ticketHeaderId = 1
     newOrder.ticketFooterId = 1
     realm.write(() => {
       realm.create('Order', newOrder )
     })
 
-    const { navigate } = this.props.navigation
     navigate('Order', {orderId: newOrder.id})
     this.personKeyboardDialog.dismiss()
     this.setState({sitNumber: '', nbCustomer: ''})
-  }
-
-
-  getStats(finishedOrders) {
-    var totalTtc = 0;
-    var totalHt = 0; 
-    var totalHt1 = 0; 
-    var totalHt2 = 0; 
-    var totalHt3 = 0;
-    var totalTtc1 = 0;
-    var totalTtc2 = 0;
-    var totalTtc3 = 0;
-    var ESP = 0, CB = 0, TR = 0, CQ = 0, CV = 0, Amex = 0, Credit = 0;
-
-    for (var i = 0; i < finishedOrders.length; i++) {
-      var order = finishedOrders[i];
-      if (order.canceled) continue;
-      totalTtc += order.totalTtc;
-      totalHt += order.totalHt;
-      totalHt1 += order.totalHt1;
-      totalHt2 += order.totalHt2;
-      totalHt3 += order.totalHt3;
-      totalTtc1 += order.totalTtc1;
-      totalTtc2 += order.totalTtc2;
-      totalTtc3 += order.totalTtc3;
-    }
-    
-    this.setState({
-      totalTtc: totalTtc,
-      totalHt: totalHt,
-      totalVat1: totalTtc1 - totalHt1,
-      totalVat2: totalTtc2 - totalHt2,
-      totalVat3: totalTtc3 - totalHt3,
-    })
   }
 
   render() {
@@ -261,7 +198,7 @@ export default class OrderList extends React.Component {
           tabBarTextStyle={{fontSize: 28}}
           renderTabBar={() => <DefaultTabBar style={{height: 100}}/>} >
 
-        <View tabLabel={'Sur place'} style={styles.tabLabelStyle} >
+        <View tabLabel="座位" style={styles.tabLabelStyle} >
           <TouchableOpacity 
             onPress={() => this.newOrder("sit")}
             style={{ height: 80, marginTop: 10}}>
@@ -277,7 +214,7 @@ export default class OrderList extends React.Component {
 
 
 
-        {/* <View tabLabel={'Bar'} style={styles.tabLabelStyle}>
+        {/* <View tabLabel="前台" style={styles.tabLabelStyle}>
           <TouchableOpacity 
             onPress={() => this.newOrder("bar")}
             style={{ height: 80, marginTop: 10}}>
@@ -291,7 +228,7 @@ export default class OrderList extends React.Component {
           />
         </View> */}
 
-        <View tabLabel={'Emportée'} style={styles.tabLabelStyle}>
+        <View tabLabel="打包" style={styles.tabLabelStyle}>
           <TouchableOpacity 
             onPress={() => this.newOrder("takeAway")}
             style={{ height: 80, marginTop: 10}}>
@@ -305,7 +242,7 @@ export default class OrderList extends React.Component {
           />
         </View>
 
-        {/* <View tabLabel={I18n.t('LIVRAISON')} style={styles.tabLabelStyle}>
+        {/* <View tabLabel="送包" style={styles.tabLabelStyle}>
           <TouchableOpacity 
             onPress={() => this.newOrder("delivery")}
             style={{ height: 80, marginTop: 10}}>
@@ -319,43 +256,12 @@ export default class OrderList extends React.Component {
           />
         </View> */}
 
-          {/* <View tabLabel={'Stats'} style={styles.tabLabelStyle}>
-
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.itemPrice}>Total TTC</Text>
-              <Text style={styles.itemPrice}>{this.state.totalTtc.toFixed(2)} €</Text>
-            </View>
-
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.itemPrice}>Total HT</Text>
-              <Text style={styles.itemPrice}>{this.state.totalHt.toFixed(2)} €</Text>
-            </View>
-
-
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.itemPrice}>Tva 5.50%</Text>
-              <Text style={styles.itemPrice}>{this.state.totalVat1.toFixed(2)} €</Text>
-            </View>
-
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.itemPrice}>Tva 10%</Text>
-              <Text style={styles.itemPrice}>{this.state.totalVat2.toFixed(2)} €</Text>
-            </View>
-
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.itemPrice}>Tva 20%</Text>
-              <Text style={styles.itemPrice}>{this.state.totalVat3.toFixed(2)} €</Text>
-            </View>
-
-
-          </View> */}
-
         </ScrollableTabView>
 
         <PopupDialog ref={(tableListDialog) => { this.tableListDialog = tableListDialog; }}
                       dialogAnimation={slideAnimation}>
                       
-          <View style={{backgroundColor: 'white', height: height, width: width}}>
+          <View style={{backgroundColor: 'white', height: height / 1.4, width: width}}>
             <ScrollView
                 pagingEnabled={true}
                 horizontal={false}
@@ -370,7 +276,7 @@ export default class OrderList extends React.Component {
                       
                       <TouchableOpacity key={idx} 
                                         style={[styles.square, table.idOrder != 0 && {backgroundColor: 'red'}]}
-                                        onPress={() => this.newSitOrderStep11(table)}
+                                        onPress={() => this.newSitOrder(table)}
                                         disabled={table.idOrder != 0 ? true : false}>
                         <Text style={styles.tableNumber}>{table.name}</Text>
                       </TouchableOpacity>
@@ -391,7 +297,7 @@ export default class OrderList extends React.Component {
                   <TextInput
                     ref='sitNumber'
                     style={{fontSize: 70, textAlign: 'center', flexDirection: 'row', flex: 1}}
-                    placeholder={'Table'}
+                    placeholder= "座号"
                     keyboardType="numeric"
                     defaultValue={this.state.sitNumber}
                     onChangeText={(text) => this.setState({sitNumber: text})}  
@@ -424,13 +330,13 @@ export default class OrderList extends React.Component {
                   <TextInput
                     ref='nbCustomer'
                     style={{fontSize: 70, textAlign: 'center', flexDirection: 'row', flex: 1}}
-                    placeholder={'Personnes'}
+                    placeholder= "人数"
                     keyboardType="numeric"
                     defaultValue={this.state.nbCustomer}
                     onChangeText={(text) => this.setState({nbCustomer: text})}
                     
                   />
-                  <TouchableOpacity onPress={() => this.newSitOrderStep22()} style={{flex: 1, alignItems: 'center'}}>
+                  <TouchableOpacity onPress={() => this.newSitOrderStep2()} style={{flex: 1, alignItems: 'center'}}>
                       <Text style={styles.buttonOk}>OK</Text>
                   </TouchableOpacity>
                 </View>

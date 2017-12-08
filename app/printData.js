@@ -117,7 +117,7 @@ function printKitchen(Printer, selectedOrder) {
         }
 
         printer
-        .encode('857')
+        .encode('GBK')
         .font('a')
         .align('lt')
         .style('bu')
@@ -125,7 +125,58 @@ function printKitchen(Printer, selectedOrder) {
         .text("\n\n\n")
         .text(selectedOrder.type == 'sit' ? 'Table: ' + selectedOrder.table + '  \t\tCV: ' + selectedOrder.nbCustomer : selectedOrder.type == 'takeAway' ? 'EMPORTER ' + selectedOrder.table : selectedOrder.type == 'delivery' ? 'LIVRAISON ' + selectedOrder.table : 'COMPTOIR ' + selectedOrder.table)
         // .text(moment(selectedOrder.createdAt).format('HH:mm') + '\t' + selectedOrder.userName)
-        .text(moment(selectedOrder.createdAt).format('HH:mm'))
+        // .text(moment(selectedOrder.createdAt).format('HH:mm'))
+        .text("------------------------")
+        .size(2, 2)
+        products.forEach((p) => {
+        if (p.printKitchen == true) {
+            if (p.type == "product" || p.type == "")
+              printer.text(p.quantity + '\t' + p.name)
+            else if (p.type == "option") {
+              printer.text('\t   ' + p.quantity + ' ' + p.name)
+            }
+            else if (p.type == "next") {
+              printer.text('---------------')
+            }
+        }
+        })
+        
+        printer
+        .text("\n")
+        .cut()
+
+        setTimeout(() => {
+        device.close(function(err){
+            
+        });
+        }, 1000)
+    })
+}
+
+function printKitchen2(Printer, selectedOrder) {
+  
+    var products = Array.prototype.slice.call(selectedOrder.products);
+    var createdAt = moment(selectedOrder.createdAt).format('DD-MM-YYYY HH:mm');
+    
+    let printerIp = realm.objects('Printer')[2] ? realm.objects('Printer')[2].ipAddress : ''    
+    const device  = new escpos.Network(printerIp);
+    const printer = new escpos.Printer(device);
+
+    device.open((err, dev) => {
+        if (err) {
+        return console.log(err);                
+        }
+
+        printer
+        .encode('GBK')
+        .font('a')
+        .align('lt')
+        .style('bu')
+        .size(2, 2)
+        .text("\n\n\n")
+        .text(selectedOrder.type == 'sit' ? 'Table: ' + selectedOrder.table + '  \t\tCV: ' + selectedOrder.nbCustomer : selectedOrder.type == 'takeAway' ? 'EMPORTER ' + selectedOrder.table : selectedOrder.type == 'delivery' ? 'LIVRAISON ' + selectedOrder.table : 'COMPTOIR ' + selectedOrder.table)
+        // .text(moment(selectedOrder.createdAt).format('HH:mm') + '\t' + selectedOrder.userName)
+        // .text(moment(selectedOrder.createdAt).format('HH:mm'))
         .text("------------------------")
         .size(2, 2)
         products.forEach((p) => { 
@@ -153,11 +204,10 @@ function printKitchen(Printer, selectedOrder) {
     })
 }
 
+
 function printTicket(Printer, selectedOrder) {
-  var config = realm.objects('Config')[0];
-  var ticketHeader = realm.objects('TicketHeader');
-  var companyHeader = ticketHeader[selectedOrder.ticketHeaderId - 1];
-  var ticketFooter = realm.objects('TicketFooter')[0];
+  let ticketHeader = realm.objects('TicketHeader').sorted('id')
+  let ticketFooter = realm.objects('TicketFooter').sorted('id')
   var products = Array.prototype.slice.call(selectedOrder.products);
   var totalTtc = selectedOrder.totalTtc.toFixed(2);
   var totalHt = selectedOrder.totalHt.toFixed(2);
@@ -165,38 +215,40 @@ function printTicket(Printer, selectedOrder) {
   var Remise = selectedOrder.discount.toFixed(2);
   var createdAt = moment(selectedOrder.createdAt).format('DD-MM-YYYY HH:mm');
 
-  const device  = new escpos.Network(Printer.ipAddress);
+  let printerIp = realm.objects('Printer')[0] ? realm.objects('Printer')[0].ipAddress : ''
+  console.log(printerIp)
+  const device  = new escpos.Network(printerIp);
   const printer = new escpos.Printer(device);
-
-  device.open((err, dev) => {
-    if (err) {
-      return console.log(err);                
-    }
   
-    printer
-    .encode('857')
-    .font('a')
-    .align('ct')
-    .style('bu')
-    .size(2, 2)
-    .text(companyHeader.name)
-    .size(1, 1)
-    .text(companyHeader.address)
-    .text(companyHeader.postal + " " + companyHeader.city + " " + companyHeader.country)
-    .text(companyHeader.siret)
-    .text("N° Tva: " + companyHeader.vat)
-    .text("Code Naf: " + companyHeader.ape)
-    .text("Tél: " + companyHeader.phone + "\n")
-    .align('lt')
-    .text(createdAt)
-    .text("Document provisoire n°" + selectedOrder.id + " (impr:"+ selectedOrder.nbPrinted + "-" + selectedOrder.products.length +  ")\n")
-    .size(2, 2)
-    .text(selectedOrder.type == 'sit' ? 'Table: ' + selectedOrder.table + '  \t\tCV: ' + selectedOrder.nbCustomer : selectedOrder.type == 'takeAway' ? 'EMPORTER ' + selectedOrder.table : selectedOrder.type == 'delivery' ? 'LIVRAISON ' + selectedOrder.table : 'COMPTOIR ' + selectedOrder.table)
-    .size(1, 1)
-    .text("------------------------------------------------")
+  device.open((err, dev) => {
+  if (err) {
+      return console.log(err);                
+  }
+  
+  printer
+  .encode('857')
+  .font('a')
+  .align('ct')
+  
+
+  for (let i = 0; i < ticketHeader.length; i++) {
+    if (i == 0 )  printer.size(2, 2)
+    else printer.size(1, 1)
+    printer.text(ticketHeader[i].text)
+  }
+
+  printer
+  .size(1, 1)
+  .align('lt')
+  .text(createdAt)
+  //.text("Document provisoire n°" + selectedOrder.id + " (impr:"+ selectedOrder.nbPrinted + "-" + selectedOrder.products.length +  ")\n")
+  .size(2, 2)
+  .text(selectedOrder.type == 'sit' ? 'Table: ' + selectedOrder.table + '  \t\tCV: ' + selectedOrder.nbCustomer : selectedOrder.type == 'takeAway' ? 'EMPORTER ' + selectedOrder.table : selectedOrder.type == 'delivery' ? 'LIVRAISON ' + selectedOrder.table : 'COMPTOIR ' + selectedOrder.table)
+  .size(1, 1)
+  .text("------------------------------------------------")
 
 
-    if (selectedOrder.type == 'delivery') {
+  if (selectedOrder.type == 'delivery') {
       let deliveryAddress = selectedOrder.customer.deliveryAddress
       printer.text("Adresse de livrraison:")
       printer.text(selectedOrder.customer.firstName + ' ' + selectedOrder.customer.lastName)
@@ -207,67 +259,71 @@ function printTicket(Printer, selectedOrder) {
       printer.text("Code 1: " + deliveryAddress.code1 + "\tCode 2: " + deliveryAddress.code2 + "\tInter: " + deliveryAddress.interphone)
       printer.text("Note: " + deliveryAddress.note)
       printer.text("------------------------------------------------")
-    }
+  }
 
-    printer.align('lt')
-    .text("QTÉ   DESCRIPTION                  P.U     Total")
-    products.forEach((p) => { 
-      if (p.type == "product" || p.type == "") {
-        if (p.discount && p.discount == 100) {
-          if (!p.gram)
-            printer.text(formatQuantity(p.quantity) + formatName(p.name) + ' OFFERT')
-          else 
-            printer.text(formatQuantity(1) + formatName(truncate(p.name) + ' ' + p.quantity + 'g') + ' OFFERT')
-        }
-        else {
-          if (!p.gram)
-            printer.text(formatQuantity(p.quantity) + formatName(p.name) + formatPu(p.priceTtc.toFixed(2)) + formatTotalTtc(p.totalTtc.toFixed(2)))
-          else
-            printer.text(formatQuantity(1) + formatName(truncate(p.name)+ ' ' + p.quantity + 'g') + formatPu(p.priceTtc.toFixed(2)) + formatTotalTtc(p.totalTtc.toFixed(2)))
-        }
-        
-        if (p.discount && p.discount != 100)
-          printer.text("\t\t\tREMISE " + p.discount + "%\t-" + p.totalDiscountTtc.toFixed(2))
+  printer.align('lt')
+  .text("QTÉ   DESCRIPTION                  P.U     Total")
+  products.forEach((p) => { 
+    if (p.type == "product" || p.type == "") {
+      if (p.discount && p.discount == 100) {
+        if (!p.gram)
+          printer.text(formatQuantity(p.quantity) + formatName(p.name) + ' OFFERT')
+        else 
+          printer.text(formatQuantity(1) + formatName(truncate(p.name) + ' ' + p.quantity + 'g') + ' OFFERT')
       }
-        else if (p.type == "option") {
-          if (!p.gram)
-            printer.text('     ' + formatOptQuantity(p.quantity) + formatOptName(p.name) + formatOptPu(p.priceTtc.toFixed(2)) + formatOptTotalTtc(p.totalTtc.toFixed(2)))
-          else
-            printer.text('     ' + formatOptQuantity(1) + formatOptName(truncate(p.name)+ ' ' + p.quantity + 'g') + formatOptPu(p.priceTtc.toFixed(2)) + formatOptTotalTtc(p.totalTtc.toFixed(2)))
-        }
-    })
+      else {
+        if (!p.gram)
+          printer.text(formatQuantity(p.quantity) + formatName(p.name) + formatPu(p.priceTtc.toFixed(2)) + formatTotalTtc(p.totalTtc.toFixed(2)))
+        else
+          printer.text(formatQuantity(1) + formatName(truncate(p.name)+ ' ' + p.quantity + 'g') + formatPu(p.priceTtc.toFixed(2)) + formatTotalTtc(p.totalTtc.toFixed(2)))
+      }
+      
+      if (p.discount && p.discount != 100)
+        printer.text("\t\t\tREMISE " + p.discount + "%\t-" + p.totalDiscountTtc.toFixed(2))
+    }
+      else if (p.type == "option") {
+        if (!p.gram)
+          printer.text('     ' + formatOptQuantity(p.quantity) + formatOptName(p.name) + formatOptPu(p.priceTtc.toFixed(2)) + formatOptTotalTtc(p.totalTtc.toFixed(2)))
+        else
+          printer.text('     ' + formatOptQuantity(1) + formatOptName(truncate(p.name)+ ' ' + p.quantity + 'g') + formatOptPu(p.priceTtc.toFixed(2)) + formatOptTotalTtc(p.totalTtc.toFixed(2)))
+      }
+  })
 
-    printer.text("------------------------------------------------")
-    if (selectedOrder.discount) {
+  printer.text("------------------------------------------------")
+  if (selectedOrder.discount) {
       printer
       .align('rt')
       .text("REMISE " + selectedOrder.discount + "%" + "\t-" + selectedOrder.totalDiscountTtc.toFixed(2) + " Eur")
       .align('lt')
-    }
-    printer
-    .size(2, 2)
-    .text("\nTOTAL TTC" + formatOrderTtc(selectedOrder.totalTtc.toFixed(2)))
-    .size(1, 1)
-    .align('ct')
-    .text("\n------------------------------------------------")
-    .text('Vous avez été servi par: ' + selectedOrder.userName + ', Caisse ' + selectedOrder.deviceId + '\nLogiciel "La Note" version: ' + selectedOrder.appVersion)
-    .text('Cat: '+ config.nf525CategoryId + '  Cert: ' + config.nf525CertificateId)
-    .text("------------------------------------------------")
-    .text(ticketFooter.footer[0].value + "\n" + ticketFooter.footer[1].value +  "\n" + ticketFooter.footer[2].value +  "\n" + ticketFooter.footer[3].value)
-    .cut()
+  }
+  printer
+  .size(2, 2)
+  .text("\nTOTAL TTC" + formatOrderTtc(selectedOrder.totalTtc.toFixed(2)))
+  .size(1, 1)
+  .align('ct')
+  
+  printer.text("\n------------------------------------------------")
+  printer.text("Merci de votre visite")
+  printer.text("A bientôt")
+  printer.text("\n")
+  // for (let i = 0; i < ticketFooter.length; i++) {
+  //   printer.text(ticketFooter[i].text)
+  // }
+
+  printer.cut()
 
   setTimeout(() => {
-    device.close(function(err){
-      console.log('goodbye!');
-    });
+  device.close(function(err){
+      
+  });
   }, 1000)
 
 })
-  
 }
 
 
 module.exports = {
   printKitchen,
+  printKitchen2,
   printTicket
 }

@@ -29,6 +29,10 @@ export default class ProductEdit  extends React.Component {
       this.subCategory = this.props.navigation.state.params.subCategory
       this.saveProduct = this.saveProduct.bind(this)
     
+      realm.addListener('change', () => {
+        this.product = {}
+      });
+
       this.state = {
         selectedProduct: this.product,
         productName: this.product.name,
@@ -37,10 +41,14 @@ export default class ProductEdit  extends React.Component {
         productGram: this.product.gram,
         printKitchen: this.product.printKitchen,
 
-        
+
         selectedCategory: realm.objects('Category').filtered('id = 1')[0],
         selectedSubCategory: realm.objects('SubCategory').filtered('id = 1')[0],
       }
+    }
+
+    componentWillUnmount() {
+      realm.removeAllListeners();    
     }
 
     saveProduct () {
@@ -70,7 +78,7 @@ export default class ProductEdit  extends React.Component {
       realm.write(() => {
         realm.create('Product', product, true)
       })
-
+      this.product = product
       alert('成功')
 
     }
@@ -80,7 +88,8 @@ export default class ProductEdit  extends React.Component {
         realm.write(() => {
           realm.delete(products.filtered('id = ' + this.product.id));
         })
-        alert('成功')
+        // const { navigate, goBack } = this.props.navigation;
+        // goBack()
     }
 
 
@@ -151,7 +160,7 @@ export default class ProductEdit  extends React.Component {
                   isChecked={this.product.printKitchen}
                   leftText={'打印厨房'}
                   leftTextStyle={{fontSize: 26}}
-                />  
+                />
 
                 <TouchableOpacity onPress={() => this.deleteProduct()}>
                   <Text>
@@ -253,13 +262,14 @@ export default class ProductEdit  extends React.Component {
     // Button Product
 
     product_empty: {
-      height: width / 5.60,
-      width: width / 5.00,
+      width : width / 5,
+      height : height / 9,
+      
     },
 
     product: {
-      height: width / 5.60,
-      width: width / 5.00,
+      width : width / 5,
+      height : height / 9,
       alignItems: 'center',
       justifyContent: 'center',
       borderColor: "white",
@@ -278,7 +288,7 @@ export default class ProductEdit  extends React.Component {
       fontSize: 20,
       fontWeight: 'bold',
       color: 'white',
-      textAlign: 'center',
+      textAlign: 'center'
     },
 
     // Button Menu

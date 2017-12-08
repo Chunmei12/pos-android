@@ -31,19 +31,19 @@ export default class MenuScreen extends React.Component {
 
         <View style={{flex: 8, backgroundColor: 'white', flexDirection: 'column'}}>
 
-          <TouchableOpacity style={{flexDirection: 'column', height: height / 5, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('OrderList')}>
+          <TouchableOpacity style={{flexDirection: 'column', height: height / 4, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('OrderList')}>
             <Text style={{flexWrap: 'wrap', textAlign: 'justify', fontSize: 28}}>点单</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{flexDirection: 'column', height: height / 5, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('Product')}>
+          <TouchableOpacity style={{flexDirection: 'column', height: height / 4, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('Product')}>
             <Text style={{flexWrap: 'wrap', textAlign: 'justify', fontSize: 28}}>菜单</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{flexDirection: 'column', height: height / 5, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('Printer')}>
+          <TouchableOpacity style={{flexDirection: 'column', height: height / 4, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('Printer')}>
             <Text style={{flexWrap: 'wrap', textAlign: 'justify', fontSize: 28}}>打印机</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{flexDirection: 'column', height: height / 5, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('TicketHeader')}>
+          <TouchableOpacity style={{flexDirection: 'column', height: height / 4, width: width, alignItems: 'center', justifyContent: 'center', borderRadius: 5}} onPress={() => navigate('TicketHeader')}>
             <Text style={{flexWrap: 'wrap', textAlign: 'justify', fontSize: 28}}>店消息</Text>
           </TouchableOpacity>
 
