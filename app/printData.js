@@ -1,9 +1,10 @@
 var moment = require('moment');
 const escpos = require('escpos');
 import realm from './models/realm'
-
+ 
 //G.BK
 //8.57
+  
 
 const truncate = (str, length = 20, ending = '.') => {
   if (str.length > length) {
@@ -107,7 +108,7 @@ function printKitchen(Printer, selectedOrder) {
     var products = Array.prototype.slice.call(selectedOrder.products);
     var createdAt = moment(selectedOrder.createdAt).format('DD-MM-YYYY HH:mm');
     
-    let printerIp = realm.objects('Printer')[1] ? realm.objects('Printer')[1].ipAddress : ''    
+    let printerIp = realm.objects('Printer')[1].ipAddress; 
     const device  = new escpos.Network(printerIp);
     const printer = new escpos.Printer(device);
 
@@ -158,7 +159,7 @@ function printKitchen2(Printer, selectedOrder) {
     var products = Array.prototype.slice.call(selectedOrder.products);
     var createdAt = moment(selectedOrder.createdAt).format('DD-MM-YYYY HH:mm');
     
-    let printerIp = realm.objects('Printer')[2] ? realm.objects('Printer')[2].ipAddress : ''    
+    let printerIp = realm.objects('Printer')[2].ipAddress;
     const device  = new escpos.Network(printerIp);
     const printer = new escpos.Printer(device);
 
@@ -215,7 +216,7 @@ function printTicket(Printer, selectedOrder) {
   var Remise = selectedOrder.discount.toFixed(2);
   var createdAt = moment(selectedOrder.createdAt).format('DD-MM-YYYY HH:mm');
 
-  let printerIp = realm.objects('Printer')[0] ? realm.objects('Printer')[0].ipAddress : ''
+  let printerIp = realm.objects('Printer')[0].ipAddress;
   console.log(printerIp)
   const device  = new escpos.Network(printerIp);
   const printer = new escpos.Printer(device);

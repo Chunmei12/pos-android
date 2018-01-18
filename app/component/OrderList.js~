@@ -67,7 +67,7 @@ export default class OrderList extends React.Component {
       orderBar: realm.objects('Order').filtered('type = "bar" AND closed = false').sorted('createdAt', true),
       totalTakeAway: realm.objects('Order').filtered('type = "takeAway" AND closed = false').length,
       totalBar: realm.objects('Order').filtered('type = "bar" AND closed = false').length,
-      lastOrderId: realm.objects('currentOrderId')[0].id,
+      lastOrderId: realm.objects('Order').sorted('id',true)[0].id,
     })
   }
 

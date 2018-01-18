@@ -16,12 +16,13 @@ import {
 
 let {height, width} = Dimensions.get('window');
 import realm from '../../models/realm'
+import {  FormLabel, FormInput } from "react-native-elements";
 
 export default class TicketHeader extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      footers: realm.objects('TicketHeader')
+      footers: realm.objects('TicketHeader').sorted('id')
     }
     this.updateUI = this.updateUI.bind(this)
     this.addNewLine = this.addNewLine.bind(this)
@@ -37,7 +38,7 @@ export default class TicketHeader extends React.Component {
 
   updateUI() {
     this.setState({
-      footers: realm.objects('TicketHeader'),
+      footers: realm.objects('TicketHeader').sorted('id'),
     })
   }
 
@@ -71,18 +72,19 @@ export default class TicketHeader extends React.Component {
 
   _renderItem = ({item}) => (
       <View style={{flexDirection: 'row'}}>
-        <TextInput style={{flex: 1, height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 10}}
-          placeHolder={item.index}
-          defaultValue={item.text}
-          onChangeText={(text) => this.updateLine(item, text)}
-        />
-        
         <Button
+          style ={{flex:1, padding:5}}
           onPress={() => this.deleteLine(item)}
-          title="X"
-          color="black"
+          title="删除"
+          color="red"
           accessibilityLabel="Delete"
         />
+         <FormInput
+               containerStyle ={{flex:1}}
+               defaultValue={item.text}
+               onChangeText={(text) => this.updateLine(item, text)}
+            />
+   
       </View>
   )
 
@@ -90,20 +92,28 @@ export default class TicketHeader extends React.Component {
     const { navigate, goBack } = this.props.navigation;
     return (
       <View style={styles.container}>
-        <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => goBack()}>
-            <Image
-              style={{flexWrap: 'wrap', height: 40, width: 40}}
-              source={require('../../../assets/img/back-left-arrow.png')}
-            />
-          </TouchableOpacity>
-        </View>
+         <View style={styles.containerOrderBack}>
+         <View style={styles.navBarStyle}>
+           <TouchableOpacity onPress={() => {goBack();}} style={styles.backButton}>
+             
+           <View style={{flexDirection:"row", flex:1, alignItems:"center"}}>
+             <Image
+               style={styles.backLeftArrowImg}
+               source={require('../../../assets/img/back-left-arrow.png')}
+               />
+             <Text style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>返回</Text>
+           </View>
+           </TouchableOpacity>
+           <View style={{ flex:1, alignItems:"center"}}>
+             <Text style={{color: 'white',fontWeight: 'bold', fontSize: 18}}>小票顶部</Text>
+           </View>
+           <TouchableOpacity onPress={() => { this.addNewLine();}} style={styles.updateButton}>
+             <Text style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>添加</Text>
+           </TouchableOpacity>
+         </View>
+       </View>
         <View style={{flex: 14, backgroundColor: 'white', flexDirection: 'column', padding: 20}}>
           
-            <TouchableOpacity style={styles.addButton} onPress={() => this.addNewLine()}>
-              <Text style={styles.addText}>+</Text>
-            </TouchableOpacity>
-
             <FlatList
               data={this.state.footers}
               extraData={this.state}
@@ -121,7 +131,6 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    flexDirection: 'row',
   },
 
   textTitle: {
@@ -139,6 +148,33 @@ const styles = StyleSheet.create({
 
   addText: {
     fontSize: 38
-  }
+  },
+  containerOrderBack: {
+    padding: 0,
+    backgroundColor: 'red'
+  },
+  navBarStyle: {
+    height: height / 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+
+
+  backButton: {
+    alignItems:"flex-start",
+    justifyContent: 'flex-start',
+  },
+
+  backLeftArrowImg: {
+    height: 20,
+    width: 20,
+    tintColor: 'white',
+  },
+
+  updateButton: {
+    justifyContent: 'flex-end',
+  },
+
 
 })
